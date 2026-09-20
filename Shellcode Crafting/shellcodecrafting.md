@@ -49,3 +49,83 @@ The syscall can also be debugged uing GDB with the usual steps
 ## (i) Position Independence
 A position independent shellcode is a shellcode that can execute correctly regardless of the memory address where it is placed.
 This is important since shellcode cannot assume where its code would begin ( absolute address ) thus it needs to calculate the address at runtime
+Position Independence is made up of many concepts which include 
+### (a) Absolute vd Reltive Addresses
+An absolute address directly contains the complete virtual address of something
+``` asm
+mov rax , 0x401234
+```
+The instruction contains an address tied to a particular location. If the code or the data moves the embedded address doesn't automatically change and thus it is position dependent.
+
+A relative address specifies a displacement from some known reference point rather than storiting the complete address.
+```
+target = curret location + displacemnt 
+```
+Even if the code moves the displacement still remains the same and that is why relative addresssing is useful in Position independent Shellcodes
+
+### (b) x86-64 and RIP -Relative Addressing
+x86-64 has a useful mechanism 
+```
+[RIP + displacement ]
+```
+RIP is the address of the next instruction.
+For instance given the instruction
+``` asm
+	lea rax , [rip + message]
+```
+It conceptually means  that RAX = address of the current RIP + displacement to message and the displacement from the relevant RIP remains the same if the entire shellcode moves
+
+Relative branches is another way of relative addressing 
+``` asm 
+	jmp target
+```
+On x86-64 a near jmp can encode a relative displacemnt and if the shellcode moves both the jmp and the target move together
+
+Although relative addressing is this helpful it is still challenged by external things such as :
+- libc functions
+- kernel APIs
+- shared library symbols
+- system calls
+The shellcode may know where its own code / data is but it doesn't necessaritly know where an external function is located. For this reason dynamic symbol / API resolution is required.
+
+### (c) Call / ret mechanics
+Call interacts directly with the stack and instruction pointer thus its importance in this.
+Consider :
+``` asm
+	call fucntion
+```
+Conceptually the CPU perfomrs two operation when the call function is called:
+- push address of the next instruction
+- jump to function
+
+It changes both RIP and RSP in the following ways
+- RSP = decreases by 8
+- RIP = changes to target
+
+Consider
+```asm
+	ret
+```
+On call the CPU performs
+- Pop the return address
+- Shift execution to the next function
+
+### (d) Call / pop technique
+It is a classic way of obtaining  a code-relative address on x86-64. 
+The basic idea is that when call is called it places the address of the next instruction on the stack and then transfers execution to the fucntion in the argument pop then removes that address from the stack and put it back into a regiser rbx
+This is position Independent sicne teh call function can be called at any address during runtime and the hardcoded address would only be the one that gets popped
+This technique changes the stack thus forgetting to use the pop can interfere with later code particularly a subsequent ret
+
+#### (e) Position Independent Data
+It refers to data whose address does not depend on where the code was loaded.
+The important property is that the distance between the code and data stays constant
+By data we are referencing to :
+- strings
+- constants
+- tables
+- structures
+- encoded data
+- configuration values
+- lookup tables
+
+# NULL byte avoidance
