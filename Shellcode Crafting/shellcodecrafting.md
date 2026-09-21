@@ -129,3 +129,39 @@ By data we are referencing to :
 - lookup tables
 
 # NULL byte avoidance
+Null byte avoidance means designing the machine code bytes so the payload contains no 0x00 bytes.
+This matters because many vulnerable programs treat input as  a C string, where 0x00 means 'end of string'. If your shellcode contains a null byte , function such as `strcpy` , `strcat` or similar string oriented paths may stop copying before the shellcode is complete
+The common techniques include:
+### (i) Zeroing Registers
+Instead of 
+``` asm 
+	mov rax, 0
+```
+use 
+```asm
+	xor rax, rax	; |
+	sub rax, rax
+```
+### (ii) Small constants
+Instead of loading a large immediae containing lots of zero bytes, sometimes you can construct a value incrementatlly
+``` asm
+	xor rax, rax
+	inc rax
+```
+You can also use operations such as
+```asm
+	xor rax, rax
+	mov al, 60
+```
+This is useful when only the low byte needs to be changed
+
+### (iiiv) Constructing Strings
+A common conceptual approach is:
+- represent the characters as hexadecimal bytes
+- check whether the representation contains 00
+- if necessary , transform / construct the value using arithmetic or register operations
+- place the resulting bytes in memory
+- ensure the machine code representation, not merely the final string is free of nulls
+
+Simply checking the strings isnt enough since one might write assembly that looks like it avoids nulls but the assembler could produce an instruction encoding containing 00. You can inspect the executable using objdump to inspect the bytes and xxd for the shellcode blob
+
