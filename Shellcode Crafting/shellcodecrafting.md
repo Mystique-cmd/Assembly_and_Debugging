@@ -203,6 +203,29 @@ A function that uses these is expected to restore them before returning
 rsp has its own special requirements because it controls the stack
 Stack preservation is also important so the order or pushing and popping should also consider its preservation ( leaving the stack balanced ) leaving the stack unbalanced can cause the eventual ret to fetch the wrong address
 
+## 5. Stack Alignement
+It means ensuring that rsp points to an address with the alignment expected by the CPU/ABI when the shellcode executes instruction or calls functions
+On x86-64 Linux ( System V ABI ) the important rule is: " Before executing a call, the stack should be 16-byte aligned according to the ABI convention,
+And call itself pushes an 8 byte return address so the value of the rsp changes by 8 bytes
+Suppose a shellcode:
+```asm 
+	push ...
+	push ...
+	call ...
+```
+every push subtracts 8 bytes from rsp thus if one makes an odd number of pushes one can shift the stack alignment by 8 bytes
+If the rsp was aligned before the push , the push changes the alignement then call pushes another 8 bytes thus depending on where you are entering from and what you are calling the alignemnt can be wrong or right.
+This can be inspected using GNU GDB:
+``` bash 
+	p/x $rsp
+	p $rsp % 16
+```
+For pure syscall shellcode , stack alignment is often much less important because you are communicating directly with the kernel
+It becomes more important when the shellcode
+- calls existing functions
+- jumps into compiled code
+- uses instructions / instruction sequences requiring particular alignment
+- build more complex stack based data structures
 
 
 
