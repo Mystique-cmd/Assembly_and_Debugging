@@ -182,13 +182,26 @@ This is how shelcode handles the restrictions
 (iii) Encoding / Decoding the payload - a restricted byte representation can be used as the initial payload, followed by a small decoder that reconstructs the original bytes in memory
 (iv) Avoid problematic data entirely - sometimes the restriction affects strings or embedded constants rather than instructions. One can generate the required data dynamically instead of storing it directly
 
+## 4. Register Preservation
+It means making sure the shellcode does not unnecessarily destroy CPU register values that the surrounding program may still need.
+This matters because shellcode is usually injected into an existing execution context and one does not control what values are already in registers when execution reaches your shellcode
+Not every register must be preserved though. This is where the calling conention become important. In System V AMD64 ABI the registers are broadly categorized into:
+a) Caller saved :
+The called function is allowed to destroy these
+- rax
+- rcx
+- rdx
+- rsi
+- rdi
+- r8 - r11
+b) Callee saved:
+A function that uses these is expected to restore them before returning 
+- rbx
+- rbp
+- r12 - r15
 
-
-
-
-
-
-
+rsp has its own special requirements because it controls the stack
+Stack preservation is also important so the order or pushing and popping should also consider its preservation ( leaving the stack balanced ) leaving the stack unbalanced can cause the eventual ret to fetch the wrong address
 
 
 
