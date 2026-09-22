@@ -46,7 +46,7 @@ The syscall can also be debugged uing GDB with the usual steps
 (vi) Inspect rax ` info registers rax`
 
 # Shellcode Constraints
-## (i) Position Independence
+## 1. Position Independence
 A position independent shellcode is a shellcode that can execute correctly regardless of the memory address where it is placed.
 This is important since shellcode cannot assume where its code would begin ( absolute address ) thus it needs to calculate the address at runtime
 Position Independence is made up of many concepts which include 
@@ -128,7 +128,7 @@ By data we are referencing to :
 - configuration values
 - lookup tables
 
-# NULL byte avoidance
+## 2. NULL byte avoidance
 Null byte avoidance means designing the machine code bytes so the payload contains no 0x00 bytes.
 This matters because many vulnerable programs treat input as  a C string, where 0x00 means 'end of string'. If your shellcode contains a null byte , function such as `strcpy` , `strcat` or similar string oriented paths may stop copying before the shellcode is complete
 The common techniques include:
@@ -164,4 +164,61 @@ A common conceptual approach is:
 - ensure the machine code representation, not merely the final string is free of nulls
 
 Simply checking the strings isnt enough since one might write assembly that looks like it avoids nulls but the assembler could produce an instruction encoding containing 00. You can inspect the executable using objdump to inspect the bytes and xxd for the shellcode blob
+
+## 3. Character Restrictions
+A restricted character set means that the shellcode cannot contains certain bytes values becasue something in the delivery path modifies, truncates or rejects them.
+A common special case is the null byte `0x00` because C string functions may intepret it as the end of the input
+The restricred character situations  and there reasonsinclude:
+- 0x00  = C strings 
+- 0x0a = newline terminates input
+- 0x0d = carriage return handling
+- 0x20 = space separated input
+- 0x09 = tab handling
+- 0x25 - application specific filtering
+- High bytes = ASCII - only transport
+This is how shelcode handles the restrictions
+(i) Choosing alternative instruction encoding
+(ii) Constructing the values at runtime instead of embedding problematic bytes
+(iii) Encoding / Decoding the payload - a restricted byte representation can be used as the initial payload, followed by a small decoder that reconstructs the original bytes in memory
+(iv) Avoid problematic data entirely - sometimes the restriction affects strings or embedded constants rather than instructions. One can generate the required data dynamically instead of storing it directly
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
