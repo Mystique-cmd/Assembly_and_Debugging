@@ -227,7 +227,15 @@ It becomes more important when the shellcode
 - uses instructions / instruction sequences requiring particular alignment
 - build more complex stack based data structures
 
-
+## 6. Executable vs Non Executable Memory
+A  memory page can have permission such as :
+- R = read
+- W = write
+- X = execute
+.text and dynamically allocated memory are explicitly given execute permissions
+A non executable memory is a memory withoyt the X flag
+Modern systems with NX/DEP normally prevent instruction fetching from a page in memory
+This is important in shellcode since simply redirecting RIP is not enough the target memory  must also be executable
 
 
 
