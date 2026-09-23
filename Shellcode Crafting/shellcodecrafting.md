@@ -273,10 +273,26 @@ With this the shellcode development workflow becomes:
 - Testing each syscall independently
 Seccomp sits after the syscall instruction reaches the kernel, thus having the correct registers doesn't guarantee the operation will succeed
 
+## 8. Syscall Availability
+It means which syscalls the shellcode can actually invoke successfully in the environment where it executes
+The syscall can be unavailabale due to the OS , architecture, sandbox or security policy
+The architecture determines the syscall interface this makes the shellcode inherently architecture specific unless deliberately designed otherwise.
 
+Architecture | Instruction | Sycall number register
+|--------------|-------------|-------------------------
+x86-64| syscall | rax
+x86| int 0x80 | eax
+ARM64| svc #0| x8
+ARM32 | svc |r7
 
-
-
+Availability doesnt mean the operation will necessarily succeed the kernel can also return an error because of:
+- invalid arguments
+- invalid address
+- insufficient permissions
+- nonexistent file
+- unavailable resource
+- sandbox restrictions
+shellcode is designed to operate with very little environment support by interacting directly with the kernel 
 
 
 
