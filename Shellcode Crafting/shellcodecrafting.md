@@ -237,8 +237,41 @@ A non executable memory is a memory withoyt the X flag
 Modern systems with NX/DEP normally prevent instruction fetching from a page in memory
 This is important in shellcode since simply redirecting RIP is not enough the target memory  must also be executable
 
-
-
+## 7. Seccomp Restrictions
+Seccomp ( Secure Computing )  is a LInux Kernel Mechanism that restricts which system calls a process can make.
+This matters in shellcode since it interacts with the  kernel through syscalls
+A seccomp filter can restrict syscalls such as :
+- read
+- write
+- openat
+- mmap
+- mprotect
+- execve
+- exit
+- clone
+- socket
+- ptrace
+It can also restrict them basedon syscall arguments
+A shellcode payload has to operate within the syscall policy imposed on its process.
+The seccomp filter can exist in two modes
+### (a) Strict Mode
+The traditional strict mode permits only a very small set of syscalls, historically centered around
+- read
+- write
+- _exit
+- sigreturn
+### (b) Filter mode - SECCOMP_MODE_FILTER
+It uses a BPF based filter to decide what happens when a syscall is attempted.
+The filter can return different action including allowing the syscall, returning an error, killing the process or trapping it.
+With this the shellcode development workflow becomes:
+- Identifying the architecture
+- identifying syscall ABI
+- Determining seccomp policy
+- Identifying allowed syscalls
+- Determining allowed arguments
+- Designing functionality arount the constraints
+- Testing each syscall independently
+Seccomp sits after the syscall instruction reaches the kernel, thus having the correct registers doesn't guarantee the operation will succeed
 
 
 
