@@ -1,3 +1,5 @@
+# Extracting Raw Shellcode Bytes
+
 I will be using the assembly program [ exit a process program ](./Codes/exit.asm)
 Then assembling it with:
 `nasm -f elf6 exit.asm -o exit.o`

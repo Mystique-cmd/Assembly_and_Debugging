@@ -1,4 +1,6 @@
-A shellcode is machine code intended to execute from a controlled/ injected memory location.
+# Shellcode Crafting
+
+A shellcode is machine code intended to execute from a controlled or injected memory location.
 The execution reaches shellcode when the CPU's Instruction pointer is redirected to the address containing the shellcode bytes.
 
 # Linux x86-64 Syscalls

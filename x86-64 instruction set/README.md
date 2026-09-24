@@ -1,4 +1,6 @@
-The x86-64 instruction set is the set of machine instructions understood by 64-bit x86 CPUs ( AMD64/Intel 64).
+# x86-64 Instruction Set
+
+The x86-64 instruction set is the set of machine instructions understood by 64-bit x86 CPUs (AMD64/Intel 64).
 At the lowest level a program becomes a sequence of bytes. We can confirm this using the command `hexdump -C  -s <address> -n 32 <program name>`.
 The CPU decodes those bytes into an instruction. The instructions are in assembly.
 

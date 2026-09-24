@@ -12,7 +12,7 @@ decode_loop:
 	
 	jmp encoded_payload
 	
-encoded_payload
+encoded_payload:
 	incbin "encoded.bin"
 	
 encoded_len equ $ - encoded_payload

@@ -1,6 +1,19 @@
-On the previous labs I used things like 
-``` asm 
-	mov rsi, message
-	mov rsi, buffer
+# Lab 04: Position-Independent Shellcode
+
+## Objective
+
+Previous labs used absolute addresses such as:
+
+```asm
+mov rsi, message
+mov rsi, buffer
 ```
-The above create address/ relocation issues when raw .text is extracted. This shellcode now solves that
+
+Those instructions create relocation issues when raw `.text` is extracted. This lab uses a `call`/`pop` sequence to discover the message address at runtime.
+
+## Build and run
+
+```bash
+./build.sh
+./harness
+```

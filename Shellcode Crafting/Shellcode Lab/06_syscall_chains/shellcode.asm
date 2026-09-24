@@ -4,15 +4,16 @@ _start:
 	;---read(0, buffer, 64)
 	xor rax, rax
 	xor rdi, rdi
-	mov rsi, buffer
+	lea rsi, [rel buffer]
 	mov rdx, 64
 	syscall
 	
 	;---rax = bytes read
 	;---write(1, buffer, bytes read)
+	mov rdi, 1
 	mov rdx, rax
 	mov rax, 1
-	mov rsi, buffer
+	lea rsi, [rel buffer]
 	syscall
 	
 	;--exit(0)

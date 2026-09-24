@@ -1,32 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 
-int main(void)
+int main(int argc, char **argv)
 {
-	FILE *file;
+	const char *path = argc > 1 ? argv[1] : "shellcodeV1.0.1.bin";
+	int file = open(path, O_RDONLY);
+	struct stat file_info;
 	unsigned char *shellcode;
-	long file_size;
+	size_t file_size;
 	
-	//Openomg the raw shellcode file
-	file = fopen("shellcodeV.1.0.1.bin", "rb");
-	if ( file == NULL){
-		perror("fopen");
+	if (file == -1 || fstat(file, &file_info) == -1) {
+		perror("open");
 		return 1;
 	}
+	file_size = (size_t)file_info.st_size;
 	
-	// Determine the size of the shellcode
-	fseek ( file, 0, SEEK_END);
-	file_size = ftell(file);
-	rewind(file);
-	
-	if ( file_size <= 0){
+	if (file_size == 0) {
 		fprintf(stderr, "[-] Invalid Shellcode Size\n");
-		fclose(file);
+		close(file);
 		return 1;
 	}
-	printf("[+] Shellcode size: %ld bytes \n", file_size);
+	printf("[+] Shellcode size: %zu bytes\n", file_size);
 	
 	//Allocate executable memory
 	shellcode = mmap(
@@ -39,19 +37,18 @@ int main(void)
 	);
 	if (shellcode == MAP_FAILED){
 		perror("mmap");
-		fclose(file);
+		close(file);
 		return 1;
 	}
 	
-	// Load shellcodeV1.0.1.bin into executable memory
-	if (fread(shellcode, 1, file_size, file) != (size_t)file_size){
-		perror("fread");
+	if (read(file, shellcode, file_size) != (ssize_t)file_size) {
+		perror("read");
 		munmap(shellcode, file_size);
-		fclose(file);
+		close(file);
 		return 1;
 	}
 	
-	fclose(file);
+	close(file);
 	printf("[+] Shellcode loaded at %p \n", (void *)shellcode);
 	printf("[+] Executing Shellcode....\n");
 	
@@ -59,7 +56,7 @@ int main(void)
 	void (*execute_shellcode)(void) = (void (*)(void))shellcode;
 	execute_shellcode();
 	
-	printf("[+] Shellcode returned \n");
+	printf("[+] Shellcode returned\n");
 	munmap(shellcode, file_size);
 	return 0;
 	
